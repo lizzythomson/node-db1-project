@@ -33,7 +33,7 @@ router.get('/:id', checkAccountId, (req, res) => {
     });
 });
 
-router.post('/', checkAccountPayload, (req, res) => {
+router.post('/', checkAccountPayload, checkAccountNameUnique, (req, res) => {
   accountsModel
     .create(req.body)
     .then((account) => {
@@ -50,8 +50,10 @@ router.put('/:id', checkAccountId, checkAccountPayload, (req, res) => {
   const { id } = req.params;
   accountsModel
     .updateById(id, req.body)
-    .then((updatedAccount) => {
-      res.json(updatedAccount);
+    .then(() => {
+      res
+        .status(200)
+        .json({ id, name: req.body.name, budget: req.body.budget });
     })
     .catch(() => {
       res
