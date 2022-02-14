@@ -5,6 +5,7 @@ const accountsModel = require('./accounts-model');
 const {
   checkAccountId,
   checkAccountPayload,
+  checkAccountNameUnique,
 } = require('./accounts-middleware');
 
 router.get('/', (req, res) => {
@@ -45,12 +46,32 @@ router.post('/', checkAccountPayload, (req, res) => {
     });
 });
 
-router.put('/:id', (req, res, next) => {
-  // DO YOUR MAGIC
+router.put('/:id', checkAccountId, checkAccountPayload, (req, res) => {
+  const { id } = req.params;
+  accountsModel
+    .updateById(id, req.body)
+    .then((updatedAccount) => {
+      res.json(updatedAccount);
+    })
+    .catch(() => {
+      res
+        .status(500)
+        .json({ message: 'There was an error while updating the accounts' });
+    });
 });
 
-router.delete('/:id', (req, res, next) => {
-  // DO YOUR MAGIC
+router.delete('/:id', checkAccountId, async (req, res) => {
+  const { id } = req.params;
+  const accountToDelete = await accountsModel.getById(id);
+  accountsModel
+    .deleteById(id)
+    .then(() => {
+      res.json(accountToDelete);
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(500).json({ message: 'Error deleting the user' });
+    });
 });
 
 router.use((err, req, res, next) => {

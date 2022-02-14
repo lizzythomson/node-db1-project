@@ -22,8 +22,18 @@ exports.checkAccountPayload = async (req, res, next) => {
   }
 };
 
-exports.checkAccountNameUnique = (req, res, next) => {
-  // DO YOUR MAGIC
+exports.checkAccountNameUnique = async (req, res, next) => {
+  req.body.name = req.body.name.trim();
+  const data = accountsModel.getAll();
+  if (
+    data.find((account) => {
+      account.name === req.body.name;
+    })
+  ) {
+    res.status(400).json({ message: 'that name is taken' });
+  } else {
+    next();
+  }
 };
 
 exports.checkAccountId = async (req, res, next) => {
