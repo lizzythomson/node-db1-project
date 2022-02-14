@@ -1,22 +1,28 @@
-const getAll = () => {
-  // DO YOUR MAGIC
-}
+const db = require('../../data/db-config');
 
-const getById = id => {
-  // DO YOUR MAGIC
-}
+const getAll = async () => {
+  return db('accounts');
+};
 
-const create = account => {
-  // DO YOUR MAGIC
-}
+const getById = async (id) => {
+  return db('accounts').where({ id }).first();
+};
+
+const create = (account) => {
+  return db('accounts')
+    .insert(account)
+    .then((ids) => {
+      return getById(ids[0]);
+    });
+};
 
 const updateById = (id, account) => {
   // DO YOUR MAGIC
-}
+};
 
-const deleteById = id => {
+const deleteById = (id) => {
   // DO YOUR MAGIC
-}
+};
 
 module.exports = {
   getAll,
@@ -24,4 +30,4 @@ module.exports = {
   create,
   updateById,
   deleteById,
-}
+};
