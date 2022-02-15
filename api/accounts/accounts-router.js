@@ -8,45 +8,40 @@ const {
   checkAccountNameUnique,
 } = require('./accounts-middleware');
 
-router.get('/', (req, res) => {
+router.get('/', (req, res, next) => {
   accountsModel
     .getAll()
     .then((accounts) => {
       res.json(accounts);
     })
-    .catch((error) => {
-      console.log(error);
-      res.status(500).json({ message: 'error occurred' });
-    });
+    .catch((err) => next(err));
 });
 
-router.get('/:id', checkAccountId, (req, res) => {
+router.get('/:id', checkAccountId, (req, res, next) => {
   const id = req.params.id;
   accountsModel
     .getById(id)
     .then((account) => {
       res.json(account);
     })
-    .catch((error) => {
-      console.log(error);
-      res.status(500).json({ message: 'error occurred' });
-    });
+    .catch((err) => next(err));
 });
 
-router.post('/', checkAccountPayload, checkAccountNameUnique, (req, res) => {
-  accountsModel
-    .create(req.body)
-    .then((account) => {
-      res.status(201).json(account);
-    })
-    .catch(() => {
-      res
-        .status(500)
-        .json({ message: 'There was an error while saving the account' });
-    });
-});
+router.post(
+  '/',
+  checkAccountPayload,
+  checkAccountNameUnique,
+  (req, res, next) => {
+    accountsModel
+      .create(req.body)
+      .then((account) => {
+        res.status(201).json(account);
+      })
+      .catch((err) => next(err));
+  }
+);
 
-router.put('/:id', checkAccountId, checkAccountPayload, (req, res) => {
+router.put('/:id', checkAccountId, checkAccountPayload, (req, res, next) => {
   const { id } = req.params;
   accountsModel
     .updateById(id, req.body)
@@ -55,14 +50,10 @@ router.put('/:id', checkAccountId, checkAccountPayload, (req, res) => {
         .status(200)
         .json({ id, name: req.body.name, budget: req.body.budget });
     })
-    .catch(() => {
-      res
-        .status(500)
-        .json({ message: 'There was an error while updating the accounts' });
-    });
+    .catch((err) => next(err));
 });
 
-router.delete('/:id', checkAccountId, async (req, res) => {
+router.delete('/:id', checkAccountId, async (req, res, next) => {
   const { id } = req.params;
   const accountToDelete = await accountsModel.getById(id);
   accountsModel
@@ -70,15 +61,12 @@ router.delete('/:id', checkAccountId, async (req, res) => {
     .then(() => {
       res.json(accountToDelete);
     })
-    .catch((error) => {
-      console.log(error);
-      res.status(500).json({ message: 'Error deleting the user' });
-    });
+    .catch((err) => next(err));
 });
 
 router.use((err, req, res, next) => {
-  // eslint-disable-line
-  // DO YOUR MAGIC
+  console.log('Error', err);
+  res.status(500).json({ message: 'Internal Server Error' });
 });
 
 module.exports = router;
